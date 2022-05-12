@@ -31,6 +31,7 @@ public class RuntimeRetargetingV3 : MonoBehaviour
     bool initialized = false;
     Animator anim;
     public bool automatic = false;
+    public float translationScale = 1;
     // Start is called before the first frame update
     void Start()
     {
@@ -114,7 +115,7 @@ public class RuntimeRetargetingV3 : MonoBehaviour
             {
                 dstT.rotation = rotation.normalized;
                 src.GetGlobalPosition(m.src, out srcPosition);
-                dstT.position = srcPosition;
+                dstT.position = srcPosition*translationScale;
             }
             else
             {

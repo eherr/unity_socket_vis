@@ -13,7 +13,7 @@ public abstract class NetworkPoseProvider : MonoBehaviour {
     {
         int boneIdx = indexMap[srcJoint];
         var v = pose.rotations[boneIdx];
-        var q = new Quaternion(v[0], v[1], v[2], v[3]);
+        var q = new Quaternion(v.x, v.y, v.z, v.w);
         return q;
     }
 
@@ -21,7 +21,7 @@ public abstract class NetworkPoseProvider : MonoBehaviour {
     {
         int boneIdx = indexMap[srcJoint];
         var v = pose.positions[boneIdx]*scaleFactor;
-        return new Vector3(v[0], v[1], v[2]);
+        return new Vector3(v.x, v.y, v.z);
     }
 
     virtual public bool GetGlobalPosition(string srcJoint, out Vector3 p)
@@ -30,7 +30,7 @@ public abstract class NetworkPoseProvider : MonoBehaviour {
         if (pose == null) return false;
        int boneIdx = indexMap[srcJoint];
         var v = pose.positions[boneIdx]*scaleFactor;
-        p =  new Vector3(v[0], v[1], v[2]);
+        p =  new Vector3(v.x, v.y, v.z);
         return true;
     }
 
@@ -40,7 +40,7 @@ public abstract class NetworkPoseProvider : MonoBehaviour {
         if (pose == null) return false;
         int boneIdx = indexMap[srcJoint];
         var v = pose.rotations[boneIdx];
-        q = new Quaternion(v[0], v[1], v[2], v[3]);
+        q = new Quaternion(v.x, v.y, v.z, v.w);
         return true;
     }
 

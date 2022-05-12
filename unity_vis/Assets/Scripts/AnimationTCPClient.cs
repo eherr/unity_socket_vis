@@ -24,9 +24,12 @@ namespace CustomAnimation
         public SkeletonDesc skeletonDesc = null;
         Dictionary<string, GameObject> points;
         StartPose startPose;
+
+        public bool paused;
+        public bool switchUpAxis;
+        public bool createVisBodies = true;
         public void Start()
         {
-            Debug.Log("Start object");
             pose = null;
             points = new Dictionary<string, GameObject>();
             initialized = false;
@@ -190,22 +193,36 @@ namespace CustomAnimation
 
         private void setPoseFromString(string message)
         {
+            if (paused) return; 
             pose = JsonUtility.FromJson<CKeyframe>(message);
+            for(int i =0; i <pose.positions.Length; i++)
+            {
+        
+                var p = pose.positions[i]* scaleFactor;
+                var r = pose.rotations[i];
+                if (switchUpAxis){
+                    p = new Vector3(p.x, p.z, p.y);
+                    r = new Vector4(r.x, r.z, r.y, -r.w);
+                }
+                pose.positions[i] = p;
+                pose.rotations[i] = r;
+            }
         }
 
 
         public void Update()
         {
 
+            if (paused) return; 
             if (initialized && pose != null)
             {
                 int index = 0;
                 foreach (var name in skeletonDesc.jointSequence)
                 {
                     
-                    var pos = pose.positions[index];
-                    points[name].transform.position = pos* scaleFactor;
-
+                    var r = pose.rotations[index];
+                    points[name].transform.position =  pose.positions[index];
+                    points[name].transform.rotation = new Quaternion(r.x, r.y, r.z, r.w);
 
                     index += 1;
                 }
@@ -259,7 +276,11 @@ namespace CustomAnimation
             foreach (var jointName in skeletonDesc.jointSequence)
             {
 
-                points[jointName] = createJointVisualization(visScaleFactor);
+                if (createVisBodies){
+                    points[jointName] = createJointVisualization(visScaleFactor);
+                }else{
+                    points[jointName] = new GameObject();
+                }
                 points[jointName].name = jointName;
                 points[jointName].transform.parent = transform;
             }
@@ -267,19 +288,19 @@ namespace CustomAnimation
 
         protected GameObject createJointVisualization(float scale=1.0f)
         {
-            GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            
+            GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             Mesh mesh = jointObj.GetComponent<MeshFilter>().mesh;
             List<Vector3> newVertices = new List<Vector3>();
-            var r = Quaternion.Euler(0, 0, 90);
+            var r = Quaternion.Euler(90, 0, 0);
             for (int i = 0; i < mesh.vertices.Length; i++)
             {
                 var v = mesh.vertices[i];
-                var newV = new Vector3(v.x * scale, scale * v.y, v.z * scale);
+                var newV =  new Vector3(v.x * scale, scale * v.y, v.z * scale);
                 newVertices.Add(newV);
             }
             jointObj.GetComponent<MeshFilter>().mesh.vertices = newVertices.ToArray();
             jointObj.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+
             return jointObj;
         }
 
